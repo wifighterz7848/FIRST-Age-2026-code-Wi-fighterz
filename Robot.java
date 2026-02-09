@@ -31,10 +31,7 @@ public final class Robot extends TimedRobot {
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
-  @Override
-  public void robotInit() {
-    m_robotContainer.startCamera();
-  }
+
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
