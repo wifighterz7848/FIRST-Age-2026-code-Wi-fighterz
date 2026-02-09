@@ -113,3 +113,10 @@ public class MAXSwerveModule {
     m_drivingEncoder.setPosition(0);
   }
 }
+
+
+  /** Zeroes all the SwerveModule encoders. */
+  public void resetEncoders() {
+    m_drivingEncoder.setPosition(0);
+  }
+}
