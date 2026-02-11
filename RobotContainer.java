@@ -181,7 +181,7 @@ autoTab.add("Auto Chooser", autoChooser)
 driverController.povDown()
   .onTrue(new InstantCommand(arm::goBottom, arm));
 
-driverController.a()
+driverController.rightBumper()
   .whileTrue(new RunCommand(arm::spinOn, arm))
   .onFalse(new InstantCommand(arm::spinOff, arm));
 
