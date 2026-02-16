@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.shooterSubsystem;
 import frc.robot.LimelightHelpers;
 
 import java.util.Optional;
@@ -33,6 +34,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import frc.robot.subsystems.shooterSubsystem;
 
 
 
@@ -60,12 +62,20 @@ private final ShuffleboardTab autoTab = Shuffleboard.getTab("Auto");
 
     private final DriveSubsystem drive;
     private final IntakeSubsystem arm = new IntakeSubsystem(11); // <-- put your Spark MAX CAN ID
+    private final shooterSubsystem shooter = new shooterSubsystem(
+    20, 21, 22, 23
+); // <-- replace with your real CAN IDs
+
 
 
     /* ---------------- Controllers ---------------- */
 
     private final CommandXboxController driverController =
             new CommandXboxController(OIConstants.kDriverControllerPort);
+
+            private final CommandXboxController shooterController =
+    new CommandXboxController(1); // <-- put your shooter controller USB port here
+
 
     private final Joystick controller1 = new Joystick(1);
     private final Joystick controller2 = new Joystick(2);
@@ -184,6 +194,18 @@ driverController.povDown()
 driverController.rightBumper()
   .whileTrue(new RunCommand(arm::spinOn, arm))
   .onFalse(new InstantCommand(arm::spinOff, arm));
+
+  shooterController.rightTrigger(0.5)
+  .whileTrue(new RunCommand(shooter::shooterOn, shooter))
+  .onFalse(new InstantCommand(shooter::shooterOff, shooter));
+
+  shooterController.povUp()
+  .whileTrue(new RunCommand(shooter::adjustUp, shooter))
+  .onFalse(new InstantCommand(shooter::adjustStop, shooter));
+
+shooterController.povDown()
+  .whileTrue(new RunCommand(shooter::adjustDown, shooter))
+  .onFalse(new InstantCommand(shooter::adjustStop, shooter));
 
 
 
@@ -323,7 +345,6 @@ driverController.rightBumper()
         return Double.NaN;
     }
 }
-
 
     public void startCamera() {
         CameraServer.startAutomaticCapture().setResolution(320, 180);
