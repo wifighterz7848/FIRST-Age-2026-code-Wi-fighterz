@@ -1,9 +1,9 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -17,9 +17,9 @@ public class shooterSubsystem extends SubsystemBase {
   public static final double ADJUST_SPEED  = 0.20; // slow
   // ================================
 
-  private final SparkMax shooter1;
-  private final SparkMax shooter2;
-  private final SparkMax shooter3;
+  private final SparkMax shooter1;   // leader
+  private final SparkMax shooter2;   // follower
+  private final SparkMax shooter3;   // follower
 
   private final SparkMax adjustMotor;
 
@@ -30,18 +30,27 @@ public class shooterSubsystem extends SubsystemBase {
 
     adjustMotor = new SparkMax(adjustId, MotorType.kBrushless);
 
-    // Shooter config (usually coast for flywheels)
-    SparkMaxConfig shooterCfg = new SparkMaxConfig();
-    shooterCfg.idleMode(IdleMode.kCoast);
-    shooterCfg.smartCurrentLimit(40);
+    // -------- Shooter config (leader) --------
+    SparkMaxConfig shooterLeaderCfg = new SparkMaxConfig();
+    shooterLeaderCfg.idleMode(IdleMode.kCoast);
+    shooterLeaderCfg.smartCurrentLimit(40);
 
-    shooter1.configure(shooterCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    shooter2.configure(shooterCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    shooter3.configure(shooterCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    shooter1.configure(shooterLeaderCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    // Adjust config (usually brake so it holds position better)
+    // -------- Shooter config (followers) --------
+    // Copy leader settings, then set follower mode
+    SparkMaxConfig shooterFollowerCfg = new SparkMaxConfig();
+    shooterFollowerCfg.apply(shooterLeaderCfg);
+
+    // If a follower needs opposite direction, change false -> true
+    shooterFollowerCfg.follow(shooter1Id, false);
+
+    shooter2.configure(shooterFollowerCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    shooter3.configure(shooterFollowerCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    // -------- Adjust config --------
     SparkMaxConfig adjustCfg = new SparkMaxConfig();
-    adjustCfg.idleMode(IdleMode.kBrake);
+    adjustCfg.idleMode(IdleMode.kCoast);
     adjustCfg.smartCurrentLimit(25);
 
     adjustMotor.configure(adjustCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -50,15 +59,11 @@ public class shooterSubsystem extends SubsystemBase {
   // ---- Shooter ----
   public void shooterOn() {
     double s = MathUtil.clamp(SHOOTER_SPEED, -1.0, 1.0);
-    shooter1.set(s);
-    shooter2.set(s);
-    shooter3.set(s);
+    shooter1.set(s);   // only set leader; followers mirror automatically
   }
 
   public void shooterOff() {
-    shooter1.set(0);
-    shooter2.set(0);
-    shooter3.set(0);
+    shooter1.set(0.0);
   }
 
   // ---- Adjust (D-pad) ----
