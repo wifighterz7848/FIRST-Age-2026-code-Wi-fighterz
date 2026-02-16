@@ -12,11 +12,12 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
+
 
 import frc.robot.Configs;
 
@@ -107,13 +108,6 @@ public class MAXSwerveModule {
 
     m_desiredState = desiredState;
   }
-
-  /** Zeroes all the SwerveModule encoders. */
-  public void resetEncoders() {
-    m_drivingEncoder.setPosition(0);
-  }
-}
-
 
   /** Zeroes all the SwerveModule encoders. */
   public void resetEncoders() {
