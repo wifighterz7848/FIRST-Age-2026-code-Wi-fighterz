@@ -26,9 +26,12 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.math.VecBuilder;
 
 import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.LimelightHelpers;
 
 public final class DriveSubsystem extends SubsystemBase {
   // Create MAXSwerveModules
@@ -54,6 +57,8 @@ public final class DriveSubsystem extends SubsystemBase {
 
   // The gyro sensor
   private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
+
+  private static final String LIMELIGHT_NAME = "limelight-right"; // change if yours is different
 
   // Odometry class for tracking robot pose
   private final SwerveDrivePoseEstimator m_odometry;
@@ -163,6 +168,7 @@ public final class DriveSubsystem extends SubsystemBase {
         getGyroHeading2d(),
         getModulePositions()
     );
+    addLimelightVisionMeasurement();
 
     Pose2d est_pose = getEstimatedPose();
     m_field.setRobotPose(est_pose);
@@ -285,6 +291,38 @@ public final class DriveSubsystem extends SubsystemBase {
     m_gyro_field_forward = getGyroHeading2d();
     System.out.print(String.format("Gyro offset after reset: %f degrees\n", m_gyro_field_forward.getDegrees()));
   }
+
+  private Rotation2d getGyroHeading2d() {
+    return Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kY));
+  }
+
+
+  private void addLimelightVisionMeasurement() {
+  // Pose estimate (blue alliance coordinate system). If your LimelightHelpers has MegaTag2
+  // variants, you can swap this call later.
+  LimelightHelpers.PoseEstimate est =
+      LimelightHelpers.getBotPoseEstimate_wpiBlue(LIMELIGHT_NAME);
+
+  if (est == null) return;
+  if (est.tagCount < 1) return;
+
+  // Reject bad/NaN poses
+  if (Double.isNaN(est.pose.getX()) || Double.isNaN(est.pose.getY())) return;
+
+  // Timestamp from LL (already latency compensated by LimelightHelpers)
+  double ts = est.timestampSeconds;
+  double now = Timer.getFPGATimestamp();
+  if (now - ts > 1.0) return; // ignore very old frames
+
+  // Optional: dynamic trust based on tags seen
+  double xyStd = (est.tagCount >= 2) ? 0.25 : 0.75; // meters
+  double thStd = Math.toRadians(999);               // trust gyro for heading mostly
+  m_odometry.setVisionMeasurementStdDevs(VecBuilder.fill(xyStd, xyStd, thStd));
+
+  m_odometry.addVisionMeasurement(est.pose, ts);
+}
+}
+
 
   private Rotation2d getGyroHeading2d() {
     return Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kY));
