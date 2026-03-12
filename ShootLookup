@@ -1,0 +1,19 @@
+package frc.robot.util;
+
+public final class ShootLookup {
+  private ShootLookup() {}
+
+  private static final double[] D = { 1.5, 2.4, 3.0, 3.9 };
+  private static final double[] R = { 2350, 2900, 3200, 3680 };
+
+  public static double rpmForDistance(double meters) {
+    if (meters <= D[0]) return R[0];
+    for (int i = 0; i < D.length - 1; i++) {
+      if (meters <= D[i + 1]) {
+        double t = (meters - D[i]) / (D[i + 1] - D[i]);
+        return R[i] + t * (R[i + 1] - R[i]);
+      }
+    }
+    return R[R.length - 1];
+  }
+}
