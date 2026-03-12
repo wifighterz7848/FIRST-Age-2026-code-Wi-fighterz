@@ -11,6 +11,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.geometry.Translation2d;
+
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -117,4 +119,16 @@ public final class Constants {
     
   }
 
+ public static final class VisionShootConstants {
+  public static final Translation2d BLUE_HUB_CENTER = new Translation2d(4.03, 4.00);
+  public static final Translation2d RED_HUB_CENTER  = new Translation2d(12.50, 4.00);
 }
+
+  // Shooter tolerance
+  public static final double RPM_TOL = 50.0;
+
+  // Feed time
+  public static final double FEED_SECONDS = 1.0;
+}
+
+
